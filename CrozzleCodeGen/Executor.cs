@@ -6,6 +6,7 @@ namespace CrozzleCodeGen
         public Executor()
         {
         }
+        
 
         public static void Execute(int interlockWidth, int interlockHeight)
         {
@@ -38,20 +39,22 @@ namespace CrozzleCodeGen
             Console.WriteLine();
 
 
-            //var path = "/Users/michaelgeurtjens/Developer/Batch/Batch/ShapeCalculators/";
-            var path = "/Users/michaelgeurtjens/Developer/BatchSwift/BatchSwift/ShapeCalculator/";
-
+            
 
 
 
 
             var result = ExecuteCreator.Execute(patterns, interlockWidth, interlockHeight, name);
 
-            System.IO.File.WriteAllText(path + name + ".swift", result);
+            //var path = "/Users/michaelgeurtjens/Developer/Batch/Batch/ShapeCalculators/";
+        string path = "/Users/michaelgeurtjens/Developer/BatchSwift/BatchSwift/ShapeCalculator/";
+
+        System.IO.File.WriteAllText(path + name + ".swift", result);
 
 
             foreach (var combinations in patterns)
             {
+                // C3x3_LRL_UDU is an example
                 var structureName = name + "_" + PatternFinder.GetSegmentName(combinations);
 
                 var source = ClusterCreator.Execute(combinations, interlockWidth, interlockHeight, structureName);
@@ -59,10 +62,6 @@ namespace CrozzleCodeGen
                 var filename = path + structureName + ".swift";
                 System.IO.File.WriteAllText(filename, source);
             }
-
-
-
-
         }
         
     }

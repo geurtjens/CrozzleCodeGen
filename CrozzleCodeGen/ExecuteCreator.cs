@@ -1,12 +1,13 @@
 ﻿using System;
 namespace CrozzleCodeGen
 {
-	public class ExecuteCreator
+    // Creates a function that can call each and every Cluster3x3 pattern for example
+    public class ExecuteCreator
 	{
 		public ExecuteCreator()
 		{
 		}
-
+        
 		public static string Execute(List<List<string>> patterns, int interlockWidth, int interlockHeight, string name)
 		{
 			string result = "public class " + name + " {\n"; ;

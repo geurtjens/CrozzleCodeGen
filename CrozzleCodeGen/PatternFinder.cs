@@ -32,7 +32,11 @@ namespace CrozzleCodeGen
 		public static List<List<string>> ExecuteX(int interlockWidth, int interlockHeight)
 		{
             // First we get all of the left/right and right/left combinations
+
             
+
+
+
             var result = PatternFinder.AllowableStates(GetAllowableX(), interlockHeight);
 
 
@@ -328,6 +332,7 @@ namespace CrozzleCodeGen
         {
             var result = new Dictionary<string, string[]>();
 
+            // What is should be is that if you are middle then you can go back to what is there prior and you cannot start with middle
             result["Right"] = new string[] { "Left","MiddleX" };
             result["Left"] = new string[] { "Right","MiddleX" };
             result["MiddleX"] = new string[] { "Left", "Right" };
@@ -419,6 +424,14 @@ namespace CrozzleCodeGen
 
         public static List<List<string>> AllowableStates(Dictionary<string, string[]> allowable, int length)
         {
+            // This is something we can try to get what we want
+            if (length == 3)
+            {
+
+            }
+
+
+
             var workingStack = new Stack<List<string>>();
 
             foreach(var item in allowable)
