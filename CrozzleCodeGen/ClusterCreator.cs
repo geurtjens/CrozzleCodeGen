@@ -77,9 +77,9 @@ namespace CrozzleCodeGen
 			{
 				indent += "    ";
 				// Here is where we put our extra things for outer
-				result += indent + "if W.Len[" + position + "] >= interlockHeight + 2 {\n";
+				result += indent + "if W.Len[" + position + "] >= interlockHeight + 2 {\n\n";
 				result += indent + "    let " + position + "Limit = Int(W.Len[" + position + "]) - Int(interlockHeight)\n";
-				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n";
+				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n\n";
 
 				indent += "    ";
 
@@ -87,21 +87,18 @@ namespace CrozzleCodeGen
 				{
 					result += indent + "    if (";
 				}
-
-
 			}
 			else if (position.StartsWith("outerx"))
 			{
 				indent += "    ";
 				// Here is where we put our extra things for outer
-				result += indent + "if W.Len[" + position + "] >= interlockWidth + 2 {\n";
+				result += indent + "if W.Len[" + position + "] >= interlockWidth + 2 {\n\n";
 				result += indent + "    let " + position + "Limit = Int(W.Len[" + position + "]) - Int(interlockWidth)\n";
-				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n";
+				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n\n";
 				indent += "    ";
 				if (i != 0)
 				{
 					result += indent + "    if (";
-
 				}
 			}
 
@@ -132,17 +129,14 @@ namespace CrozzleCodeGen
 				// Check that the word is long enough to be used in this position, depends on position
 				result += CheckLength(position, ref indent, i);
 
-
-
-
-
-				
-
-				result += CrossingWords(indent, position, i - 1, positions, interlockWidth, interlockHeight, dictionary);
-				result += GetNotEqualTo(indent, position, i - 1, positions);
+				result += CheckLettersOfThisWordInterlockWithExistingWords(indent, position, i - 1, positions, interlockWidth, interlockHeight, dictionary);
+				result += CheckThisWordIsNotSameAsAllOtherWords(indent, position, i - 1, positions);
 				
                 result += indent + "        //print(\"" + position + ":\\(W.Start[" + position + "])\")\n\n";
-				indent += "        ";
+				if (position == "outery1" || position == "outerx1")
+					indent += "    ";
+				else 
+				    indent += "        ";
 			}
 			return result;
 		}
@@ -150,36 +144,31 @@ namespace CrozzleCodeGen
 		public static string CrossedWord(string position, int positionPos, string nextPosition, int nextPositionPos, int positionStartingPos, int interlockWidth, int interlockHeight)
 		{
 			var result = "";
-
-			var positionNumber = position.Substring(position.Length - 1, 1);
-			var nextPositionNumber = nextPosition.Substring(nextPosition.Length - 1, 1);
-
-			int positionStart = Int32.Parse(positionNumber) - 1;
-			int nextPositionStart = Int32.Parse(nextPositionNumber) - 1;
-
-			if (position.StartsWith("left"))
+			
+			// trailing interlock - the interlock is at the end
+			if (position.StartsWith("left") || position.StartsWith("up"))
 				result += "W.End[" + position + "][" + positionStartingPos + "]";
 
-			else if (position.StartsWith("right"))
+			// leading interlock - the interlock is at the beginning
+            else if (position.StartsWith("down") || position.StartsWith("right") || position.StartsWith("middle"))
 				result += "W.Start[" + position + "][" + positionStartingPos + "]";
 
-			else if (position.StartsWith("middle"))
-				result += "W.Start[" + position + "][" + positionStartingPos + "]";
-
-			else if (position.StartsWith("outer"))
+			// outer is like a leading interlock except it starts a little to the right of the start
+            else if (position.StartsWith("outer"))
 				result += "W.Start[" + position + "][" + position + "Pos + " + positionStartingPos + "]";
-
-			else if (position.StartsWith("up"))
-				result += "W.End[" + position + "][" + positionStartingPos + "]";
-
-			else if (position.StartsWith("down"))
-				result += "W.Start[" + position + "][" + positionStartingPos + "]";
-
 
 			result += " == ";
 
+            // We strip the positionNumber from the end of the word
+            var positionNumber = position.Substring(position.Length - 1, 1);
+            var nextPositionNumber = nextPosition.Substring(nextPosition.Length - 1, 1);
 
-			if (nextPosition.StartsWith("down") || nextPosition.StartsWith("right") || nextPosition.StartsWith("middle"))
+            // Convert the number into an actual integer
+            int positionStart = Int32.Parse(positionNumber) - 1;
+            int nextPositionStart = Int32.Parse(nextPositionNumber) - 1;
+
+
+            if (nextPosition.StartsWith("down") || nextPosition.StartsWith("right") || nextPosition.StartsWith("middle"))
 				result += "W.Start[" + nextPosition + "][" + positionStart + "]";
 
 			else if (nextPosition.StartsWith("left"))
@@ -196,8 +185,18 @@ namespace CrozzleCodeGen
 		}
 
 		
-
-		public static string CrossingWords(string indent, string position, int pos, List<string> positions, int interlockWidth, int interlockHeight, Dictionary<string,int> dictionary)
+		/// <summary>
+		/// When placing a word we must check that it can interlock with words already in the grid
+		/// </summary>
+		/// <param name="indent"></param>
+		/// <param name="position"></param>
+		/// <param name="pos"></param>
+		/// <param name="positions"></param>
+		/// <param name="interlockWidth"></param>
+		/// <param name="interlockHeight"></param>
+		/// <param name="dictionary"></param>
+		/// <returns></returns>
+		public static string CheckLettersOfThisWordInterlockWithExistingWords(string indent, string position, int pos, List<string> positions, int interlockWidth, int interlockHeight, Dictionary<string,int> dictionary)
 		{
 			var result = "";
 
@@ -205,6 +204,7 @@ namespace CrozzleCodeGen
 
 			var positionStartingPos = 0;
 			var positionIncrementor = 1;
+			// if the interlock is trailing
 			if (position.StartsWith("left"))
 			{
 				positionStartingPos = interlockWidth - 1;
@@ -216,16 +216,25 @@ namespace CrozzleCodeGen
 				positionIncrementor = -1;
 			}
 
+			
+			int interlockCount = 0;
+
 			for (int i = 0; i <= pos; i++)
 			{
 				string nextPosition = positions[i];
 				bool nextIsUpDown = PatternUtilities.IsUpDown(nextPosition);
 
+				// We only cross over the shapes if they are perpendicular to each other, one is horizontal and one is vertical
 				if (positionIsUpDown != nextIsUpDown) {
-					// We are crossing this word
-					if (position.StartsWith("outer") == false)
+                    interlockCount += 1;
+
+					
+					if (!(position.StartsWith("outer") && interlockCount == 1))
 					{
-						result += indent + "        ";
+                        // When the word is outer then we do not check its length at this point rather we check it previously
+                        // and so all the other kinds expect we have to add indent but for outerx or outery we dont
+
+                        result += indent + "        ";
 					}
 					result += CrossedWord(position, pos, nextPosition, i, positionStartingPos,interlockWidth,interlockHeight);
 					positionStartingPos += positionIncrementor;
@@ -247,7 +256,7 @@ namespace CrozzleCodeGen
 		/// <param name="pos"></param>
 		/// <param name="positions"></param>
 		/// <returns></returns>
-		public static string GetNotEqualTo(string indent, string position, int pos, List<string> positions)
+		public static string CheckThisWordIsNotSameAsAllOtherWords(string indent, string position, int pos, List<string> positions)
 		{
 			var result = "";
 
