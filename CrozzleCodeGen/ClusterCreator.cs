@@ -49,10 +49,9 @@ namespace CrozzleCodeGen
 
 			result += ClusterCreatorUtilities.GetBrackets(indent);
 
-			result += returnCluster(patternHorizontal, patternVertical);
+			result += returnCluster(patternHorizontal, patternVertical, interlockWidth, interlockHeight);
 
-			result += "}";
-
+			result += "\n    }\n}";
 
             return result;
 		}
@@ -360,13 +359,20 @@ namespace CrozzleCodeGen
 
 		}
 
-
-		public static string returnCluster(string patternHorizontal, string patternVertical)
+        public static string returnCluster(string patternHorizontal, string patternVertical, int interlockWidth, int interlockHeight)
 		{
             var indent12 = "            ";
 
-			var result = "";
-            result += "\n        return ClusterModel(\n";
+			bool removeDuplicates = false;
+			if (interlockWidth == interlockHeight)
+                removeDuplicates = true;
+            
+			var result = "\n";
+			if (removeDuplicates == true)
+                result += "        return RemoveDuplicates.RemoveDuplicates" + interlockWidth + "x" + interlockHeight + "(cluster: ClusterModel(\n";
+             else
+                result += "        return ClusterModel(\n";
+            
             result += indent12 + "wordId: wordId,\n";
             result += indent12 + "outerStart: outerStart,\n";
             result += indent12 + "patternHorizontal: " + patternHorizontal + ",\n";
@@ -374,13 +380,12 @@ namespace CrozzleCodeGen
             result += indent12 + "interlockWidth: interlockWidth,\n";
             result += indent12 + "interlockHeight: interlockHeight,\n";
             result += indent12 + "stride: stride,\n";
-            result += indent12 + "size: shapeCount)\n";
-            result += "    }\n";
+            result += indent12 + "size: shapeCount)";
+
+			if (removeDuplicates == true)
+				result += ")";
+
 			return result;
         }
-
-
-		
     }
 }
-

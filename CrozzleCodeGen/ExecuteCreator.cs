@@ -13,15 +13,15 @@ namespace CrozzleCodeGen
 			string result = "public class " + name + " {\n"; ;
             
 
-            result += "    static func Execute(words:[String], minScore:Int, maxWidth:Int, maxHeight:Int) -> ClusterModel {\n\n";
-            result += "        let W = WordModelSOA.init(words:words)\n\n";
+            result += "    static func Execute(words: [String], scoreMin: Int, widthMax: Int, heightMax: Int) -> ClusterModel {\n\n";
+            result += "        let w = WordModelSOA(words: words)\n\n";
             result += "        let wordCount = W.wordCount\n\n";
 
             var duplicateFunction = "";
             var duplicateFunctionEnd = "";
             if (interlockWidth == interlockHeight)
             {
-                duplicateFunction = "RemoveDuplicates.Cluster" + interlockWidth + "x" + interlockHeight + "(shapes:";
+                duplicateFunction = "RemoveDuplicates" + interlockWidth + "x" + interlockHeight + "(cluster:";
                 duplicateFunctionEnd = ")";
             }
 
