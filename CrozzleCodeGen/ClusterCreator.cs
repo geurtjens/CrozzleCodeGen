@@ -9,10 +9,6 @@ namespace CrozzleCodeGen
 		{
 		}
 
-        
-
-		
-
         // This is what creates the entire pattern searching algorithm to achieve a C3x3_LRL_UDU for example
         public static string Execute(List<string> combinations, int interlockWidth, int interlockHeight, string structureName)
 		{
@@ -363,7 +359,8 @@ namespace CrozzleCodeGen
 			result += "        let stride = interlockWidth + interlockHeight\n";
 			result += "        var index = 0 //pointer to where we should put next set of words\n";
 			result += "        var shapeCount = 0\n";
-			result += "        var outerStart: [UInt8] = []\n";
+			if (containsOuter)
+			    result += "        var outerStart: [UInt8] = []\n";
 			result += "        var wordId: [UInt8] = []\n";
 			result += "\n";
 			result += "        for phase in 0..<2 {\n";
@@ -381,6 +378,11 @@ namespace CrozzleCodeGen
 		{
             var indent12 = "            ";
 
+			var hasOuter = false;
+			if (patternHorizontal.Contains("outer") || patternVertical.Contains("outer"))
+				hasOuter = true;
+
+
 			bool removeDuplicates = false;
 			if (interlockWidth == interlockHeight)
                 removeDuplicates = true;
@@ -392,7 +394,11 @@ namespace CrozzleCodeGen
                 result += "        return ClusterModel(\n";
             
             result += indent12 + "wordId: wordId,\n";
-            result += indent12 + "outerStart: outerStart,\n";
+
+			if (hasOuter)
+                result += indent12 + "outerStart: outerStart,\n";
+			else
+                result += indent12 + "outerStart: [],\n";
             result += indent12 + "patternHorizontal: " + patternHorizontal + ",\n";
             result += indent12 + "patternVertical: " + patternVertical + ",\n";
             result += indent12 + "interlockWidth: interlockWidth,\n";
