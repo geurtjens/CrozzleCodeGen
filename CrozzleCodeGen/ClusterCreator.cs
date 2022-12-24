@@ -65,39 +65,41 @@ namespace CrozzleCodeGen
 		{
 			string result = "";
 			if (position.StartsWith("up") || position.StartsWith("down"))
-				result += indent + "    if (W.Len[" + position + "] >= interlockHeight";
+				result += indent + "if (W.Len[" + position + "] >= interlockHeight";
 			else if (position.StartsWith("left") || position.StartsWith("right"))
-				result += indent + "    if (W.Len[" + position + "] >= interlockWidth";
+				result += indent + "if (W.Len[" + position + "] >= interlockWidth";
 			else if (position.StartsWith("middlex"))
-				result += indent + "    if (W.Len[" + position + "] == interlockWidth";
+				result += indent + "if (W.Len[" + position + "] == interlockWidth";
 			else if (position.StartsWith("middley"))
-				result += indent + "    if (W.Len[" + position + "] == interlockHeight";
+				result += indent + "if (W.Len[" + position + "] == interlockHeight";
 			else if (position.StartsWith("outery"))
 			{
-				indent += "    ";
+				
 				// Here is where we put our extra things for outer
 				result += indent + "if W.Len[" + position + "] >= interlockHeight + 2 {\n\n";
 				result += indent + "    let " + position + "Limit = Int(W.Len[" + position + "]) - Int(interlockHeight)\n";
 				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n\n";
 
-				indent += "    ";
+				
 
 				if (i != 0)
 				{
-					result += indent + "    if (";
+                    indent += "    ";
+                    result += indent + "    if (";
 				}
 			}
 			else if (position.StartsWith("outerx"))
 			{
-				indent += "    ";
+				
 				// Here is where we put our extra things for outer
 				result += indent + "if W.Len[" + position + "] >= interlockWidth + 2 {\n\n";
 				result += indent + "    let " + position + "Limit = Int(W.Len[" + position + "]) - Int(interlockWidth)\n";
 				result += indent + "    for " + position + "Pos in 1..<" + position + "Limit {\n\n";
-				indent += "    ";
+				
 				if (i != 0)
 				{
-					result += indent + "    if (";
+                    indent += "    ";
+                    result += indent + "    if (";
 				}
 			}
 
@@ -113,7 +115,12 @@ namespace CrozzleCodeGen
         }
 
 
-		public static string GetBody(List<string> positions, int interlockWidth, int interlockHeight, Dictionary<string, int> dictionary, ref string indent)
+		public static string GetBody(
+			List<string> positions,
+			int interlockWidth,
+			int interlockHeight,
+			Dictionary<string, int> dictionary,
+			ref string indent)
 		{
 			var result = "";
             
@@ -124,19 +131,30 @@ namespace CrozzleCodeGen
 				var position = positions[i];
 
 				result += indent + "for " + position + " in 0..<wordCount {\n\n";
-
+				indent += "    ";
 				// Check that the word is long enough to be used in this position, depends on position
 				result += CheckLength(position, ref indent, i);
 
 				result += CheckLettersOfThisWordInterlockWithExistingWords(indent, position, i - 1, positions, interlockWidth, interlockHeight, dictionary);
+
 				result += CheckThisWordIsNotSameAsAllOtherWords(indent, position, i - 1, positions);
 				
-                result += indent + "        //print(\"" + position + ":\\(W.Start[" + position + "])\")\n\n";
-				if (position == "outery1" || position == "outerx1")
+                
+
+				indent += "    ";
+
+				if (position.StartsWith("outer"))
 					indent += "    ";
-				else 
-				    indent += "        ";
-			}
+
+
+                result += indent + "//print(\"" + position + ":\\(W.Start[" + position + "])\")\n\n";
+
+                //                indent += "    ";
+                //            else if (position == "outerx1")
+                //                indent += "    ";
+                //            else 
+                //    indent += "    ";
+            }
 			return result;
 		}
 
@@ -233,7 +251,7 @@ namespace CrozzleCodeGen
                         // When the word is outer then we do not check its length at this point rather we check it previously
                         // and so all the other kinds expect we have to add indent but for outerx or outery we dont
 
-                        result += indent + "        ";
+                        result += indent + "    ";
 					}
 					result += CrossedWord(position, pos, nextPosition, i, positionStartingPos,interlockWidth,interlockHeight);
 					positionStartingPos += positionIncrementor;
@@ -261,7 +279,7 @@ namespace CrozzleCodeGen
 
 			for(int i=pos;i>=0;i--)
 			{
-				result += indent + "        W.Id[" + position + "] != W.Id[" + positions[i] + "]";
+				result += indent + "    W.Id[" + position + "] != W.Id[" + positions[i] + "]";
 				if (i == 0)
 					result += ") {\n";
 				else

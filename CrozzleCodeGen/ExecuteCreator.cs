@@ -13,22 +13,14 @@ namespace CrozzleCodeGen
 			string result = "public class " + name + " {\n"; ;
             
 
-            result += "    static func Execute(words: [String], scoreMin: Int, widthMax: Int, heightMax: Int) -> ClusterModel {\n\n";
-            result += "        let w = WordModelSOA(words: words)\n\n";
-            result += "        let wordCount = W.wordCount\n\n";
+            result += "    static func Execute(w: WordModelSOA, scoreMin: Int, widthMax: Int, heightMax: Int) -> [ShapeModel] {\n\n";
 
-            var duplicateFunction = "";
-            var duplicateFunctionEnd = "";
-            if (interlockWidth == interlockHeight)
-            {
-                duplicateFunction = "RemoveDuplicates" + interlockWidth + "x" + interlockHeight + "(cluster:";
-                duplicateFunctionEnd = ")";
-            }
+            result += "        let wordCount = w.wordCount\n\n";
 
 
             foreach (var combinations in patterns)
             {
-                result += "        let " + PatternUtilities.ConcatinateList(combinations) + " = " + duplicateFunction + name + "_" + PatternFinder.GetSegmentName(combinations) + ".Execute(W: W, wordCount: wordCount, minScore: minScore, maxWidth: maxWidth, maxHeight: maxHeight)" + duplicateFunctionEnd + "\n";
+                result += "        let " + PatternUtilities.ConcatinateList(combinations) + " = ToShape.from(cluster: " + name + "_" + PatternFinder.GetSegmentName(combinations) + ".Execute(W: w, wordCount: wordCount), wordList: w, scoreMin: scoreMin, widthMax: widthMax, heightMax: heightMax)\n";
             }
 
 
@@ -40,7 +32,6 @@ namespace CrozzleCodeGen
             {
                 string concatinatedList = PatternUtilities.ConcatinateList(combinations);
 
-
                 result += "        if " + concatinatedList + ".count > 0 {\n";
                 result += "            print(\"" + concatinatedList.ToUpper() + ": \\(" + concatinatedList + ".count)\")\n";
                 result += "        }\n";
@@ -51,21 +42,21 @@ namespace CrozzleCodeGen
 
             // We want to return a list of lists
 
-            result += "        let result: [ShapeArray] = [";
+            result += "        let result = ";
             for(int i=0;i<patterns.Count; i++)
             {
                 string patternArray = PatternUtilities.ConcatinateList(patterns[i]);
 
                 if (i > 0)
-                    result += ", ";
+                    result += " + ";
 
                 result += patternArray;
                  
             }
-            result += "]\n\n";
-            result += "        return result\n\n";
+            result += "\n";
+            result += "        return result\n";
 
-            result += "    }\n\n";
+            result += "    }\n";
             result += "}";
 
 
